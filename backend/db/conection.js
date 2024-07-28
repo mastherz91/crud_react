@@ -1,17 +1,20 @@
-import { MongoClient } from "mongodb";
 
-const connectionString = process.env.ATLAS_URI || "";
+const { MongoClient } = require('mongodb')
+require('dotenv').config()
 
-const client = new MongoClient(connectionString);
+const connect = async function() {
+  const connectionString = process.env.ATLAS_URI;
 
-let conn;
-try {
-  conn = await client.connect();
-} catch(e) {
-  console.error(e);
+  const client = new MongoClient(connectionString);
+
+  let conn;
+  try {
+    conn = await client.connect();
+    return conn.db("heroes");
+  } catch(e) {
+    console.error(e);
+  } 
 }
 
-let db = conn.db("sample_training");
 
-export default db;
-
+module.exports = connect;

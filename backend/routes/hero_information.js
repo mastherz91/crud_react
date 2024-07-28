@@ -1,10 +1,11 @@
-var db = require('conection')
+var connect = require('../db/conection')
 var express = require('express');
 var router = express.Router();
 
 
 // Get a list of 50 posts
 router.get("/", async (req, res) => {
+   let db = await connect();
     let collection = await db.collection("hero_information");
     let results = await collection.find({})
       .limit(50)
