@@ -45,7 +45,7 @@ router.put("/:id", async (req, res) => {
   const updates = {
     $set: req.body,
   };
-  let results = await collection.findOneAndUpdate(query, updates);
+  let results = await collection.updateOne(query, updates);
   res.send(results).status(200);
 });
 

@@ -6,30 +6,35 @@ export const heroService = {
     };
     return fetch("http://localhost:3001/hero", requestOptions)
       .then((response) => response.json())
-      .then((response) => {console.log(response); return response})
-     
+      .then((response) => {
+        console.log(response);
+        return response;
+      })
+
       .catch((error) => console.error(error));
   },
 
+  editHerosData(heroInfo) {
+    const myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+    const idHero=heroInfo._id
+    delete heroInfo._id
+    const raw = JSON.stringify(heroInfo);
 
+    const requestOptions = {
+      method: "PUT",
+      headers: myHeaders,
+      body: raw,
+      redirect: "follow",
+    };
 
-  getProductsMini() {
-    return Promise.resolve(this.getProductsData().slice(0, 5));
-  },
+    return fetch(`http://localhost:3001/hero/${idHero}`, requestOptions)
+      .then((response) => response.json())
+      .then((response) => {
+        console.log(response);
+        return response;
+      })
 
-  getProductsSmall() {
-    return Promise.resolve(this.getProductsData().slice(0, 10));
-  },
-
-  getProducts() {
-    return Promise.resolve(this.getProductsData());
-  },
-
-  getProductsWithOrdersSmall() {
-    return Promise.resolve(this.getProductsWithOrdersData().slice(0, 10));
-  },
-
-  getProductsWithOrders() {
-    return Promise.resolve(this.getProductsWithOrdersData());
+      .catch((error) => console.error(error));
   },
 };
