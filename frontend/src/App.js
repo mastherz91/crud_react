@@ -1,4 +1,3 @@
-//import { useState, useEffect } from "react";
 import "primereact/resources/themes/saga-blue/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
@@ -19,7 +18,7 @@ import { classNames } from "primereact/utils";
 import { InputNumber } from "primereact/inputnumber";
 
 function App() {
-  let emptyProduct = {
+  let emptyHero = {
     hero_id: 0,
     name: "",
     eye_color: "",
@@ -33,108 +32,117 @@ function App() {
     alignment_id: 0,
   };
 
-  const [products, setProducts] = useState([]);
+  const [heroes, setheroes] = useState([]);
 
 
-  const [product, setProduct] = useState(emptyProduct);
+  const [heroe, setheroe] = useState(emptyHero);
 
 
-  const [productDialog, setProductDialog] = useState(false);
-  const [deleteProductDialog, setDeleteProductDialog] = useState(false);
+  const [heroeDialog, setheroeDialog] = useState(false);
+  const [deleteheroeDialog, setDeleteheroeDialog] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [globalFilter, setGlobalFilter] = useState(null);
   const toast = useRef(null);
 
   useEffect(() => {
-    heroService.getHerosData().then((data) => setProducts(data));
+    heroService.getHerosData().then((response_data) => setheroes(response_data));
   }, []);
 
-  //Nuevo Producto
+  //Nuevo heroeo
   const openNew = () => {
-    setProduct(emptyProduct);
+    setheroe(emptyHero);
     setSubmitted(false);
-    setProductDialog(true);
+    setheroeDialog(true);
   };
   // Dialog -----
   const hideDialog = () => {
     setSubmitted(false);
-    setProductDialog(false);
+    setheroeDialog(false);
   };
 
-  const hideDeleteProductDialog = () => {
-    setDeleteProductDialog(false);
+  const hideDeleteheroeDialog = () => {
+    setDeleteheroeDialog(false);
   };
 
-  // Guardar Producto
-  const saveProduct = () => {
+  // Guardar Nuevo heroe
+  const saveheroe = () => {
     setSubmitted(true);
 
-    if (product.name.trim()) {
-      let _products = [...products];
-      let _product = { ...product };
+    if (heroe.name.trim()) {
+      let _heroes = [...heroes];
+      let _heroe = { ...heroe };
 
-      if (product.id) {
-        const index = findIndexById(product.id);
-
-        _products[index] = _product;
+      //si el heroe existe
+      if (heroe._id) {
+        const index = findIndexById(heroe._id);
+        
+        _heroes[index] = _heroe;
         toast.current.show({
           severity: "success",
           summary: "Successful",
-          detail: "Product Updated",
+          detail: "heroe Updated",
           life: 3000,
         });
+        heroService.editHerosData(heroe);
       } else {
-        _product.id = createId();
-        _product.image = "product-placeholder.svg";
-        _products.push(_product);
+        _heroe.hero_id = createId();
+        _heroes.push(_heroe);
         toast.current.show({
           severity: "success",
           summary: "Successful",
-          detail: "Product Created",
+          detail: "heroe Created",
           life: 3000,
+
         });
+        heroService.createHerosData(heroe);
+        
       }
 
-      setProducts(_products);
-      setProductDialog(false);
-      setProduct(emptyProduct);
+      setheroes(_heroes);
+      setheroeDialog(false);
+      setheroe(emptyHero);
     }
   };
 
   // Opcion Lapiz de Editar
-  const editProduct = (product) => {
-    setProduct({ ...product });
-    setProductDialog(true);
+  const editheroe = (heroe) => {
+    setheroe({ ...heroe });
+    setheroeDialog(true);
   };
 
   // Opcion de Delete -----------------
 
   
-  const confirmDeleteProduct = (product) => {
-    setProduct(product);
-    setDeleteProductDialog(true);
+  const confirmDeleteheroe = (heroe) => {
+    setheroe(heroe);
+    setDeleteheroeDialog(true);
+
+
   };
 
-  const deleteProduct = () => {
-    let _products = products.filter((val) => val.id !== product.id);
+  const deleteheroe = () => {
+    let _heroes = heroes.filter((_heroe) => _heroe._id !== heroe._id);
+    
+    setheroes(_heroes);
+    setDeleteheroeDialog(false);
+    heroService.deletHerosData(heroe);
+    setheroe(emptyHero);
 
-    setProducts(_products);
-    setDeleteProductDialog(false);
-    setProduct(emptyProduct);
     toast.current.show({
       severity: "success",
       summary: "Successful",
-      detail: "Product Deleted",
+      detail: "heroe Deleted",
       life: 3000,
     });
+    
   };
 
   // Find IndexBy
   const findIndexById = (id) => {
     let index = -1;
 
-    for (let i = 0; i < products.length; i++) {
-      if (products[i].id === id) {
+    for (let i = 0; i < heroes.length; i++) {
+      if (heroes[i]._id === id) {
         index = i;
         break;
       }
@@ -143,40 +151,16 @@ function App() {
     return index;
   };
 
-  // Crear Id de producto
+  // Crear Id de heroeo
 
   const createId = () => {
     let id = "";
-    /*let chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-
-  for (let i = 0; i < 5; i++) {
-      id += chars.charAt(Math.floor(Math.random() * chars.length));
-  }*/
-
-    return id;
+    let chars = '0123456789';
+    for (let i = 0; i < 5; i++) {
+        id += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return parseInt(id);
   };
-
-  /*
-  const onRowEditComplete = (e) => {
-    let _products = [...products];
-    let { newData, index } = e;
-
-    _products[index] = newData;
-
-    console.log(newData);
-    heroService.editHerosData(newData).then((data) => setProducts(_products));
-  };
-
-  const textEditor = (options) => {
-    return (
-      <InputText
-        type="text"
-        value={options.value}
-        onChange={(e) => options.editorCallback(e.target.value)}
-      />
-    );
-  };*/
-
   //
   const leftToolbarTemplate = () => {
     return (
@@ -191,19 +175,6 @@ function App() {
     );
   };
 
-  // Body ------- botones de editar y eliminar
-
-  /*
-  const imageBodyTemplate = (rowData) => { //cambie rowData por data
-    return (
-      <img
-        src={`https://primefaces.org/cdn/primereact/images/product/${rowData.image}`}
-        alt={rowData.image}
-        className="shadow-2 border-round"
-        style={{ width: "64px" }}
-      />
-    );
-  };*/
   const actionBodyTemplate = (rowData) => {
     return (
       <React.Fragment>
@@ -212,14 +183,14 @@ function App() {
           rounded
           outlined
           className="mr-2"
-          onClick={() => editProduct(rowData)}
+          onClick={() => editheroe(rowData)}
         />
         <Button
           icon="pi pi-trash"
           rounded
           outlined
           severity="danger"
-          onClick={() => confirmDeleteProduct(rowData)}
+          onClick={() => confirmDeleteheroe(rowData)}
         />
       </React.Fragment>
     );
@@ -240,47 +211,47 @@ function App() {
     </div>
   );
   // Dialog Eliminar
-  const productDialogFooter = (
+  const heroeDialogFooter = (
     <React.Fragment>
       <Button label="Cancel" icon="pi pi-times" outlined onClick={hideDialog} />
-      <Button label="Save" icon="pi pi-check" onClick={saveProduct} />
+      <Button label="Save" icon="pi pi-check" onClick={saveheroe} />
     </React.Fragment>
   );
 
-  const deleteProductDialogFooter = (
+  const deleteheroeDialogFooter = (
     <React.Fragment>
       <Button
         label="No"
         icon="pi pi-times"
         outlined
-        onClick={hideDeleteProductDialog}
+        onClick={hideDeleteheroeDialog}
       />
       <Button
         label="Yes"
         icon="pi pi-check"
         severity="danger"
-        onClick={deleteProduct}
+        onClick={deleteheroe}
       />
     </React.Fragment>
   );
 
   const onInputChange = (e, name) => {
     const val = (e.target && e.target.value) || "";
-    let _product = { ...product };
+    let _heroe = { ...heroe };
 
-    _product[`${name}`] = val;
+    _heroe[`${name}`] = val;
 
-    setProduct(_product);
+    setheroe(_heroe);
   };
 
 
   const onInputNumberChange = (e, name) => {
     const val = e.value || 0;
-    let _product = { ...product };
+    let _heroe = { ...heroe };
 
-    _product[`${name}`] = val;
+    _heroe[`${name}`] = val;
 
-    setProduct(_product);
+    setheroe(_heroe);
   };
 
   return (
@@ -290,7 +261,7 @@ function App() {
         <Toolbar className="mb-4" left={leftToolbarTemplate}></Toolbar>
 
         <DataTable
-          value={products}
+          value={heroes}
           //tableStyle={{ minWidth: "50rem" }}
           //editMode="row"
           //onRowEditComplete={}
@@ -298,7 +269,7 @@ function App() {
           rows={10}
           rowsPerPageOptions={[5, 10, 25]}
           paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-          currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
+          currentPageReportTemplate="Showing {first} to {last} of {totalRecords} heroes"
           globalFilter={globalFilter}
           header={header}
         >
@@ -323,42 +294,42 @@ function App() {
       </div>
 
       <Dialog
-        visible={deleteProductDialog}
+        visible={deleteheroeDialog}
         style={{ width: "32rem" }}
         breakpoints={{ "960px": "75vw", "641px": "90vw" }}
         header="Confirm"
         modal
-        footer={deleteProductDialogFooter}
-        onHide={hideDeleteProductDialog}
+        footer={deleteheroeDialogFooter}
+        onHide={hideDeleteheroeDialog}
       >
         <div className="confirmation-content">
           <i
             className="pi pi-exclamation-triangle mr-3"
             style={{ fontSize: "2rem" }}
           />
-          {product && (
+          {heroe && (
             <span>
-              Are you sure you want to delete <b>{product.name}</b>?
+              Are you sure you want to delete <b>{heroe.name}</b>?
             </span>
           )}
         </div>
       </Dialog>
 
       <Dialog
-        visible={productDialog}
+        visible={heroeDialog}
         style={{ width: "32rem" }}
         breakpoints={{ "960px": "75vw", "641px": "90vw" }}
-        header="Product Details"
+        header="heroe Details"
         modal
         className="p-fluid"
-        footer={productDialogFooter}
+        footer={heroeDialogFooter}
         onHide={hideDialog}
       >
-        {product.image && (
+        {heroe.image && (
           <img
-            src={`https://primefaces.org/cdn/primereact/images/product/${product.image}`}
-            alt={product.image}
-            className="product-image block m-auto pb-3"
+            src={`https://primefaces.org/cdn/primereact/images/heroe/${heroe.image}`}
+            alt={heroe.image}
+            className="heroe-image block m-auto pb-3"
           />
         )}
         <div className="field">
@@ -367,13 +338,13 @@ function App() {
           </label>
           <InputText
             id="name"
-            value={product.name}
+            value={heroe.name}
             onChange={(e) => onInputChange(e, "name")}
             required
             autoFocus
-            className={classNames({ "p-invalid": submitted && !product.name })}
+            className={classNames({ "p-invalid": submitted && !heroe.name })}
           />
-          {submitted && !product.name && (
+          {submitted && !heroe.name && (
             <small className="p-error">Name is required.</small>
           )}
         </div>
@@ -383,12 +354,12 @@ function App() {
           </label>
           <InputText
             id="publisher_id"
-            value={product.publisher_id}
+            value={heroe.publisher_id}
             onChange={(e) => onInputChange(e, "publisher_id")}
             required
             autoFocus
             className={classNames({
-              "p-invalid": submitted && !product.publisher_id,
+              "p-invalid": submitted && !heroe.publisher_id,
             })}
           />
         </div>
@@ -399,12 +370,12 @@ function App() {
           </label>
           <InputText
             id="gender_id"
-            value={product.gender_id}
+            value={heroe.gender_id}
             onChange={(e) => onInputChange(e, "gender_id")}
             required
             autoFocus
             className={classNames({
-              "p-invalid": submitted && !product.gender_id,
+              "p-invalid": submitted && !heroe.gender_id,
             })}
           />
         </div>
@@ -416,7 +387,7 @@ function App() {
             </label>
             <InputNumber
               id="height"
-              value={product.height}
+              value={heroe.height}
               onValueChange={(e) => onInputNumberChange(e, "height")}
             />
           </div>
@@ -426,7 +397,7 @@ function App() {
             </label>
             <InputNumber
               id="weight"
-              value={product.weight}
+              value={heroe.weight}
               onValueChange={(e) => onInputNumberChange(e, "weight")}
             />
           </div>
