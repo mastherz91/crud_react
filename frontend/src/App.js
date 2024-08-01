@@ -5,6 +5,7 @@ import "primeflex/primeflex.css";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { heroService } from "./service/heroService";
+import { publisherService } from "./service/publisherService";
 import { InputText } from "primereact/inputtext";
 
 import React, { useState, useEffect, useRef } from "react";
@@ -16,6 +17,7 @@ import { Toolbar } from "primereact/toolbar";
 import { Dialog } from "primereact/dialog";
 import { classNames } from "primereact/utils";
 import { InputNumber } from "primereact/inputnumber";
+import { Dropdown } from "primereact/dropdown";
 
 function App() {
   let emptyHero = {
@@ -33,20 +35,24 @@ function App() {
   };
 
   const [heroes, setheroes] = useState([]);
-
-
   const [heroe, setheroe] = useState(emptyHero);
-
-
   const [heroeDialog, setheroeDialog] = useState(false);
   const [deleteheroeDialog, setDeleteheroeDialog] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [globalFilter, setGlobalFilter] = useState(null);
   const toast = useRef(null);
+  const [publishers, setpublishers] = useState([]);
 
   useEffect(() => {
-    heroService.getHerosData().then((response_data) => setheroes(response_data));
+    publisherService
+      .getPublisherData()
+      .then((response_data) => setpublishers(response_data));
+    heroService
+      .getHerosData()
+      .then((response_data) => setheroes(response_data));
   }, []);
+
+  //
 
   //Nuevo heroeo
   const openNew = () => {
@@ -75,7 +81,7 @@ function App() {
       //si el heroe existe
       if (heroe._id) {
         const index = findIndexById(heroe._id);
-        
+
         _heroes[index] = _heroe;
         toast.current.show({
           severity: "success",
@@ -92,10 +98,8 @@ function App() {
           summary: "Successful",
           detail: "heroe Created",
           life: 3000,
-
         });
         heroService.createHerosData(heroe);
-        
       }
 
       setheroes(_heroes);
@@ -112,17 +116,14 @@ function App() {
 
   // Opcion de Delete -----------------
 
-  
   const confirmDeleteheroe = (heroe) => {
     setheroe(heroe);
     setDeleteheroeDialog(true);
-
-
   };
 
   const deleteheroe = () => {
     let _heroes = heroes.filter((_heroe) => _heroe._id !== heroe._id);
-    
+
     setheroes(_heroes);
     setDeleteheroeDialog(false);
     heroService.deletHerosData(heroe);
@@ -134,7 +135,6 @@ function App() {
       detail: "heroe Deleted",
       life: 3000,
     });
-    
   };
 
   // Find IndexBy
@@ -155,9 +155,9 @@ function App() {
 
   const createId = () => {
     let id = "";
-    let chars = '0123456789';
+    let chars = "0123456789";
     for (let i = 0; i < 5; i++) {
-        id += chars.charAt(Math.floor(Math.random() * chars.length));
+      id += chars.charAt(Math.floor(Math.random() * chars.length));
     }
     return parseInt(id);
   };
@@ -244,7 +244,6 @@ function App() {
     setheroe(_heroe);
   };
 
-
   const onInputNumberChange = (e, name) => {
     const val = e.value || 0;
     let _heroe = { ...heroe };
@@ -252,6 +251,17 @@ function App() {
     _heroe[`${name}`] = val;
 
     setheroe(_heroe);
+  };
+
+  const genderBody = (hero) => {
+    return hero.gender_id == 1 ? "Female" : "Male";
+  };
+
+  const publisherBody = (hero) => {
+    const publisher = publishers.find(
+      (publisher) => publisher.publiser_id == hero.publiser_id
+    );
+    return publisher ? publisher.publisher_name : hero.publiser_id;
   };
 
   return (
@@ -280,8 +290,12 @@ function App() {
             //editor={(options) => textEditor(options)}
           ></Column>
 
-          <Column field="publisher_id" header="Casa Publicadora"></Column>
-          <Column field="gender_id" header="Género"></Column>
+          <Column
+            field="publisher_id"
+            header="Casa Publicadora"
+            body={publisherBody}
+          ></Column>
+          <Column field="gender_id" header="Género" body={genderBody}></Column>
           <Column field="height" header="Altura"></Column>
           <Column field="weight" header="Peso"></Column>
 
@@ -352,32 +366,32 @@ function App() {
           <label htmlFor="publisher_id" className="font-bold">
             Casa Publicadora
           </label>
-          <InputText
+          <Dropdown
             id="publisher_id"
             value={heroe.publisher_id}
             onChange={(e) => onInputChange(e, "publisher_id")}
-            required
-            autoFocus
-            className={classNames({
-              "p-invalid": submitted && !heroe.publisher_id,
-            })}
-          />
+            options={publishers}
+            optionLabel="publisher_name"
+            optionValue="publisher_id"
+          ></Dropdown>
         </div>
 
         <div className="field">
           <label htmlFor="gender_id" className="font-bold">
             Género
           </label>
-          <InputText
+
+          <Dropdown
             id="gender_id"
             value={heroe.gender_id}
             onChange={(e) => onInputChange(e, "gender_id")}
-            required
-            autoFocus
-            className={classNames({
-              "p-invalid": submitted && !heroe.gender_id,
-            })}
-          />
+            options={[
+              { value: 1, label: "Female" },
+              { value: 2, label: "Male" },
+            ]}
+            optionLabel="label"
+            optionValue="value"
+          ></Dropdown>
         </div>
 
         <div className="formgrid grid">

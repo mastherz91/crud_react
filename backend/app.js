@@ -7,6 +7,7 @@ var logger = require("morgan");
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
 var heroRouter = require("./routes/hero_information");
+var publisherRouter = require("./routes/publisher");
 var cors = require("cors");
 var app = express();
 
@@ -26,6 +27,7 @@ app.use("/users", usersRouter);
 
 //ruta
 app.use("/hero", heroRouter);
+app.use("/publisher", publisherRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
